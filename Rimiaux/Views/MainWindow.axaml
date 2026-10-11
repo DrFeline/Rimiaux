@@ -1,5 +1,6 @@
 ﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="using:Rimiaux.Models"
         xmlns:vm="using:Rimiaux.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -15,8 +16,38 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <TextBox Text="{Binding Greeting}"
-             HorizontalAlignment="Center"
-             VerticalAlignment="Center" />
+    <DockPanel Margin="12">
+        <StackPanel DockPanel.Dock="Top" Spacing="6">
+            <TextBlock Text="RimWorld folder (e.g. ...\steamapps\common\RimWorld)" />
+            <TextBox Text="{Binding GamePath}" />
+            <TextBlock Text="Workshop folder (e.g. ...\steamapps\workshop\content\294100)" />
+            <TextBox Text="{Binding WorkshopPath}" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="Scan" Command="{Binding ScanCommand}" />
+                <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
+            </StackPanel>
+        </StackPanel>
+
+        <Expander DockPanel.Dock="Bottom" Header="Problems" HorizontalAlignment="Stretch">
+            <ListBox ItemsSource="{Binding Errors}" MaxHeight="150" />
+        </Expander>
+
+        <ListBox ItemsSource="{Binding Mods}" Margin="0,10">
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="m:ModInfo">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                        <TextBlock Opacity="0.6" FontSize="12">
+                            <Run Text="{Binding PackageId}" />
+                            <Run Text=" · " />
+                            <Run Text="{Binding Author}" />
+                            <Run Text=" · " />
+                            <Run Text="{Binding Source}" />
+                        </TextBlock>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </DockPanel>
 
 </Window>
