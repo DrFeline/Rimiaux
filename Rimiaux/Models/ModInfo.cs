@@ -2,7 +2,7 @@
 
 namespace Rimiaux.Models
 {
-    public enum ModSource { Official, Local, WorkShop }
+    public enum ModSource { Official, Local, Workshop }
 
     public class ModInfo
     {
