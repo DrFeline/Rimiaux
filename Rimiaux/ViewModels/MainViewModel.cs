@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -38,16 +39,16 @@ public partial class MainViewModel : ViewModelBase
         SettingsService.Save(_settings);
 
         Status = "Scanning...";
-        var scanner = new ModScanner();
+        ModScanner scanner = new ModScanner();
 
-        var mods = await Task.Run(() => scanner.ScanAll(_settings));
+        List<ModInfo> mods = await Task.Run(() => scanner.ScanAll(_settings));
 
         Mods.Clear();
-        foreach (var mod in mods.OrderBy(m => m.Name))
+        foreach (ModInfo mod in mods.OrderBy(m => m.Name))
             Mods.Add(mod);
 
         Errors.Clear();
-        foreach (var error in scanner.Errors)
+        foreach (string error in scanner.Errors)
             Errors.Add(error);
 
         Status = $"Found {Mods.Count} mods, {Errors.Count} problems.";

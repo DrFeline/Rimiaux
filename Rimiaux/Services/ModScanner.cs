@@ -30,7 +30,7 @@ namespace Rimiaux.Services
             if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
                 return;
 
-            foreach(var modFolder in Directory.EnumerateDirectories(root))
+            foreach(string modFolder in Directory.EnumerateDirectories(root))
             {
                 ModInfo? mod = ReadMod(modFolder, source);
                 if (mod != null)

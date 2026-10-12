@@ -19,7 +19,7 @@ namespace Rimiaux.Services
 
         public static void Save(Settings settings)
         {
-            var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
+            string json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(AppPaths.SettingsFile, json);
         }
     }
