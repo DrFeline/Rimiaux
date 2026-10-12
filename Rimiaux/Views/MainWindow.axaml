@@ -16,38 +16,55 @@
         <vm:MainViewModel />
     </Design.DataContext>
 
-    <DockPanel Margin="12">
-        <StackPanel DockPanel.Dock="Top" Spacing="6">
-            <TextBlock Text="RimWorld folder (e.g. ...\steamapps\common\RimWorld)" />
-            <TextBox Text="{Binding GamePath}" />
-            <TextBlock Text="Workshop folder (e.g. ...\steamapps\workshop\content\294100)" />
-            <TextBox Text="{Binding WorkshopPath}" />
-            <StackPanel Orientation="Horizontal" Spacing="10">
-                <Button Content="Scan" Command="{Binding ScanCommand}" />
-                <TextBlock Text="{Binding Status}" VerticalAlignment="Center" />
-            </StackPanel>
-        </StackPanel>
+    <DockPanel>
+        <Menu DockPanel.Dock="Top" Background="Gray">
+            <MenuItem Header="_File" />
+            <MenuItem Header="_Edit" />
+            <MenuItem Header="_View" />
+        </Menu>
 
-        <Expander DockPanel.Dock="Bottom" Header="Problems" HorizontalAlignment="Stretch">
-            <ListBox ItemsSource="{Binding Errors}" MaxHeight="150" />
-        </Expander>
+        <Border DockPanel.Dock="Bottom" Background="Gray">
+            <DockPanel>
+                <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="8,0" />
+                <Menu HorizontalAlignment="Right">
+                    <MenuItem Header="Scan" Command="{Binding ScanCommand}" />
+                    <MenuItem Header="Refresh" />
+                    <MenuItem Header="Sort" />
+                    <MenuItem Header="Save"/>
+                </Menu>
+            </DockPanel>
+        </Border>
 
-        <ListBox ItemsSource="{Binding Mods}" Margin="0,10">
-            <ListBox.ItemTemplate>
-                <DataTemplate x:DataType="m:ModInfo">
-                    <StackPanel>
-                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
-                        <TextBlock Opacity="0.6" FontSize="12">
-                            <Run Text="{Binding PackageId}" />
-                            <Run Text=" · " />
-                            <Run Text="{Binding Author}" />
-                            <Run Text=" · " />
-                            <Run Text="{Binding Source}" />
-                        </TextBlock>
-                    </StackPanel>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="35*" MinWidth="3"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="65*" MinWidth="3"/>
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid Margin="8">
+                    <TextBlock>Column 0</TextBlock>
+                </Grid>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Width="5" Background="Gray" />
+
+            <ListBox Grid.Column="2" ItemsSource="{Binding Mods}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="m:ModInfo">
+                        <Border>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                <TextBlock Text="{Binding PackageId}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+        </Grid>
+
     </DockPanel>
 
 </Window>
