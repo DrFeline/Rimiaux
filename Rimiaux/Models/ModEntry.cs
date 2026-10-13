@@ -27,5 +27,16 @@ namespace Rimiaux.Models
             this.PackageId = local.PackageId;
         }
 
+        public IEnumerable<ModInfo> AllInstances
+        {
+            get
+            {
+                if (Local != null)
+                    yield return Local;
+                if (Workshop != null)
+                    yield return Workshop;
+            }
+        }
+
     }
 }

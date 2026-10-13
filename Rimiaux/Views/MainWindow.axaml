@@ -54,7 +54,13 @@
                     <DataTemplate x:DataType="m:ModInfo">
                         <Border>
                             <StackPanel>
-                                <TextBlock Text="{Binding Name}" FontWeight="Bold" />
+                                <!-- <TextBlock Text="{Binding Name}" FontWeight="Bold" /> -->
+                                <TextBlock>
+                                    <!-- Formatting differs depending on whether each Run is in a newline or not. freaky -->
+                                    <Run Text="{Binding Source}" Foreground="Gray" />
+                                    <Run Text="{Binding Name}" FontWeight="Bold" />
+                                    <!-- axaml text completion sucks ASS oh my god just let me type -->
+                                </TextBlock>
                                 <TextBlock Text="{Binding PackageId}" />
                             </StackPanel>
                         </Border>

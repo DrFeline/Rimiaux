@@ -48,9 +48,9 @@ public partial class MainViewModel : ViewModelBase
         await Task.Run(() => modIndex.PopulateIndex(_settings));
 
         IEnumerable<ModInfo> mods = modIndex.Mods.Values
-            .Select(entry => entry.Local ?? entry.Workshop)
-            .OfType<ModInfo>()
-            .OrderBy(mod => mod.Name);
+            .SelectMany(entry => entry.AllInstances)
+            .OrderBy(mod => mod.Name)
+            .ThenBy(mod => mod.Source);
 
         Mods.Clear();
         foreach (ModInfo mod in mods)
