@@ -1,45 +1,60 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
-using Avalonia.Dialogs.Internal;
-using Rimiaux.Models;
-using System.Text;
-using System.Text.RegularExpressions;
 
-namespace Rimiaux.Services
+namespace Rimiaux.Models
 {
-    public class ModScanner
+    public class ModIndex
     {
-        
-        public List<ModInfo> ScanAll(Settings settings)
+        public readonly Dictionary<string, ModEntry> _mods = new Dictionary<string, ModEntry>();
+
+        public void PopulateIndex(Settings settings)
         {
-            List<ModInfo> mods = new List<ModInfo>();
-
-            ScanFolder(settings.DataPath, ModSource.Official, mods);
-            ScanFolder(settings.LocalModsPath, ModSource.Local, mods);
-            ScanFolder(settings.SteamWorkshopPath, ModSource.Workshop, mods);
-
-            return mods;
+            ScanFolder(settings.DataPath, ModSource.Official);
+            ScanFolder(settings.LocalModsPath, ModSource.Local);
+            ScanFolder(settings.SteamWorkshopPath, ModSource.Workshop);
         }
 
-        private void ScanFolder(string? root, ModSource source, List<ModInfo> mods)
+        private void add(ModInfo mod)
         {
-            if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
+            if (!_mods.TryGetValue(mod.PackageId, out ModEntry? entry))
+            {
+                _mods[mod.PackageId] = entry = new ModEntry(mod, mod.Source);
+                return;
+            }
+
+            bool isWorkshop = mod.Source == ModSource.Workshop;
+            if (isWorkshop && entry.Workshop != null)
+                return;
+            if (!isWorkshop && entry.Local != null)
                 return;
 
-            foreach(string modFolderPath in Directory.EnumerateDirectories(root))
-            {
-                ModInfo? mod = ReadMod(modFolderPath, source);
-                if (mod != null)
-                    mods.Add(mod);
-            }
-            
+            ModInfo local = isWorkshop ? entry.Local! : mod;
+            ModInfo workshop = isWorkshop ? mod : entry.Workshop!;
+
+            _mods[mod.PackageId] = new ModEntry(local, workshop);
+            return;
         }
 
-        public ModInfo? ReadMod(string modFolderPath, ModSource source)
+        private void ScanFolder(string? root, ModSource source)
+        {
+            if (!Directory.Exists(root))
+                return;
+
+            foreach (string modFolderPath in Directory.EnumerateDirectories(root))
+            {
+                ModInfo? mod = readMod(modFolderPath, source);
+                if (mod != null)
+                    add(mod);
+            }
+        }
+
+        private ModInfo? readMod(string modFolderPath, ModSource source)
         {
             string aboutPath = Path.Combine(modFolderPath, "About", "About.xml");
             if (!File.Exists(aboutPath))
@@ -61,7 +76,7 @@ namespace Rimiaux.Services
 
             return new ModInfo
             {
-                PackageId = packageIdHelper(root, name),
+                PackageId = getPackageIdHelper(root, name),
                 Name = name,
                 Authors = getAuthorsHelper(root),
                 Description = (string?)root.Element("description") ?? "No description provided.",
@@ -80,7 +95,7 @@ namespace Rimiaux.Services
             };
         }
 
-        private static string packageIdHelper(XElement root, string name)
+        private static string getPackageIdHelper(XElement root, string name)
         {
             string? packageId = (string?)root.Element("packageId");
             if (!string.IsNullOrEmpty(packageId))
@@ -135,9 +150,10 @@ namespace Rimiaux.Services
                 return new List<string>();
 
             return container.Elements("li")
-                .Select(li => li.HasElements ? (string?)li.Element("packageId"): li.Value)
-                .Where(id => !string.IsNullOrWhiteSpace(id))
-                .Select(id => id!.Trim()).ToList();
+                .Select(li => li.Element("packageId")?.Value)
+                .OfType<string>()
+                .Where(id => !string.IsNullOrEmpty(id))
+                .ToList();
         }
 
         private static string convertToAscii(string part)

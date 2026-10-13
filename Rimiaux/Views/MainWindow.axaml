@@ -27,8 +27,7 @@
             <DockPanel>
                 <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="8,0" />
                 <Menu HorizontalAlignment="Right">
-                    <MenuItem Header="Scan" Command="{Binding ScanCommand}" />
-                    <MenuItem Header="Refresh" />
+                    <MenuItem Header="Refresh" Command="{Binding ScanCommand}" />
                     <MenuItem Header="Sort" />
                     <MenuItem Header="Save"/>
                 </Menu>
@@ -44,7 +43,7 @@
 
             <Grid Grid.Column="0">
                 <Grid Margin="8">
-                    <TextBlock>Selected mod data should go here</TextBlock>
+                    <TextBlock></TextBlock>
                 </Grid>
             </Grid>
 

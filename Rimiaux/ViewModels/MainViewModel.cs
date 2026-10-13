@@ -30,10 +30,9 @@ public partial class MainViewModel : ViewModelBase
     }
 
     [ObservableProperty]
-    public partial string Status { get; set; } = "Set your folders and press Scan.";
+    public partial string Status { get; set; } = "Press refresh to scan folders.";
 
     public ObservableCollection<ModInfo> Mods { get; } = new();
-    public ObservableCollection<string> Errors { get; } = new();
 
     [RelayCommand]
     private async Task ScanAsync()
@@ -44,12 +43,17 @@ public partial class MainViewModel : ViewModelBase
         SettingsService.Save(_settings);
 
         Status = "Scanning...";
-        ModScanner scanner = new ModScanner();
+        ModIndex modIndex = new ModIndex();
+        
+        await Task.Run(() => modIndex.PopulateIndex(_settings));
 
-        List<ModInfo> mods = await Task.Run(() => scanner.ScanAll(_settings));
+        IEnumerable<ModInfo> mods = modIndex._mods.Values
+            .Select(entry => entry.Local ?? entry.Workshop)
+            .OfType<ModInfo>()
+            .OrderBy(mod => mod.Name);
 
         Mods.Clear();
-        foreach (ModInfo mod in mods.OrderBy(m => m.Name))
+        foreach (ModInfo mod in mods)
             Mods.Add(mod);
 
         Status = $"Found {Mods.Count} mods.";

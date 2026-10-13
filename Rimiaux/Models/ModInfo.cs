@@ -14,7 +14,7 @@ namespace Rimiaux.Models
         public string? ModVersion { get; init; }
         public List<string> SupportedVersions { get; init; } = new();
         public string? Url { get; init; }
-        public ModSource Source { get; init; }
+        public required ModSource Source { get; init; }
 
 
         // stores packageIds (lowercase!!)
