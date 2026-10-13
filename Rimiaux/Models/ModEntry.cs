@@ -11,12 +11,13 @@ namespace Rimiaux.Models
         public ModInfo? Local { get; set; } // official or mods folder
         public ModInfo? Workshop { get; set; }
 
-        public ModEntry(ModInfo mod, ModSource source)
+        public ModEntry(ModInfo mod)
         {
-            if (source == ModSource.Local || source == ModSource.Official)
-                this.Local = mod;
-            this.Workshop = mod;
             this.PackageId = mod.PackageId;
+            if (mod.Source == ModSource.Local || mod.Source == ModSource.Official)
+                this.Local = mod;
+            else
+                this.Workshop = mod;
         }
 
         public ModEntry(ModInfo local, ModInfo workshop)

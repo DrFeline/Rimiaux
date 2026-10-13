@@ -47,7 +47,7 @@ public partial class MainViewModel : ViewModelBase
         
         await Task.Run(() => modIndex.PopulateIndex(_settings));
 
-        IEnumerable<ModInfo> mods = modIndex._mods.Values
+        IEnumerable<ModInfo> mods = modIndex.Mods.Values
             .Select(entry => entry.Local ?? entry.Workshop)
             .OfType<ModInfo>()
             .OrderBy(mod => mod.Name);

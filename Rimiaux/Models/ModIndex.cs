@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -11,37 +12,31 @@ namespace Rimiaux.Models
 {
     public class ModIndex
     {
-        public readonly Dictionary<string, ModEntry> _mods = new Dictionary<string, ModEntry>();
+        private readonly Dictionary<string, ModEntry> _mods = new Dictionary<string, ModEntry>(StringComparer.OrdinalIgnoreCase);
+        public IReadOnlyDictionary<string, ModEntry> Mods => _mods;
 
         public void PopulateIndex(Settings settings)
         {
-            ScanFolder(settings.DataPath, ModSource.Official);
-            ScanFolder(settings.LocalModsPath, ModSource.Local);
-            ScanFolder(settings.SteamWorkshopPath, ModSource.Workshop);
+            scanFolder(settings.DataPath, ModSource.Official);
+            scanFolder(settings.LocalModsPath, ModSource.Local);
+            scanFolder(settings.SteamWorkshopPath, ModSource.Workshop);
         }
 
         private void add(ModInfo mod)
         {
             if (!_mods.TryGetValue(mod.PackageId, out ModEntry? entry))
             {
-                _mods[mod.PackageId] = entry = new ModEntry(mod, mod.Source);
+                _mods[mod.PackageId] = new ModEntry(mod);
                 return;
             }
 
-            bool isWorkshop = mod.Source == ModSource.Workshop;
-            if (isWorkshop && entry.Workshop != null)
-                return;
-            if (!isWorkshop && entry.Local != null)
-                return;
-
-            ModInfo local = isWorkshop ? entry.Local! : mod;
-            ModInfo workshop = isWorkshop ? mod : entry.Workshop!;
-
-            _mods[mod.PackageId] = new ModEntry(local, workshop);
-            return;
+            if (mod.Source == ModSource.Workshop)
+                entry.Workshop ??= mod;
+            else
+                entry.Local ??= mod;
         }
 
-        private void ScanFolder(string? root, ModSource source)
+        private void scanFolder(string? root, ModSource source)
         {
             if (!Directory.Exists(root))
                 return;
@@ -54,7 +49,7 @@ namespace Rimiaux.Models
             }
         }
 
-        private ModInfo? readMod(string modFolderPath, ModSource source)
+        private static ModInfo? readMod(string modFolderPath, ModSource source)
         {
             string aboutPath = Path.Combine(modFolderPath, "About", "About.xml");
             if (!File.Exists(aboutPath))
@@ -82,7 +77,7 @@ namespace Rimiaux.Models
                 Description = (string?)root.Element("description") ?? "No description provided.",
                 FolderPath = modFolderPath,
                 ModVersion = (string?)root.Element("modVersion"),
-                SupportedVersions = root.Elements("supportedVersions").Select(x => (string)x).ToList(),
+                SupportedVersions = root.Element("supportedVersions")?.Elements("li").Select(li => li.Value.Trim()).ToList() ?? new(),
                 Url = (string?)root.Element("url"),
                 Source = source,
 
