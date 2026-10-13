@@ -52,10 +52,6 @@ public partial class MainViewModel : ViewModelBase
         foreach (ModInfo mod in mods.OrderBy(m => m.Name))
             Mods.Add(mod);
 
-        Errors.Clear();
-        foreach (string error in scanner.Errors)
-            Errors.Add(error);
-
-        Status = $"Found {Mods.Count} mods, {Errors.Count} problems.";
+        Status = $"Found {Mods.Count} mods.";
     }
 }

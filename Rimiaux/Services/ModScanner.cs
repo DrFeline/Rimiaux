@@ -13,8 +13,7 @@ namespace Rimiaux.Services
 {
     public class ModScanner
     {
-        public List<string> Errors { get; } = new();
-
+        
         public List<ModInfo> ScanAll(Settings settings)
         {
             List<ModInfo> mods = new List<ModInfo>();
@@ -53,7 +52,6 @@ namespace Rimiaux.Services
             }
             catch (Exception ex) when (ex is XmlException or IOException)
             {
-                Errors.Add($"{aboutPath}: {ex.Message}");
                 return null;
             }
             if (root == null)
