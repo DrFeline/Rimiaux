@@ -44,7 +44,7 @@
 
             <Grid Grid.Column="0">
                 <Grid Margin="8">
-                    <TextBlock>Column 0</TextBlock>
+                    <TextBlock>Selected mod data should go here</TextBlock>
                 </Grid>
             </Grid>
 

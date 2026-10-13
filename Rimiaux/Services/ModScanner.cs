@@ -6,10 +6,11 @@ using System.Xml;
 using System.Xml.Linq;
 using Avalonia.Dialogs.Internal;
 using Rimiaux.Models;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Rimiaux.Services
 {
-    // There is still a lot to do. Check TODOs
     public class ModScanner
     {
         public List<string> Errors { get; } = new();
@@ -18,7 +19,7 @@ namespace Rimiaux.Services
         {
             List<ModInfo> mods = new List<ModInfo>();
 
-            //ScanFolder(settings.DataPath, ModSource.Official, mods);
+            ScanFolder(settings.DataPath, ModSource.Official, mods);
             ScanFolder(settings.LocalModsPath, ModSource.Local, mods);
             ScanFolder(settings.SteamWorkshopPath, ModSource.Workshop, mods);
 
@@ -30,18 +31,18 @@ namespace Rimiaux.Services
             if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
                 return;
 
-            foreach(string modFolder in Directory.EnumerateDirectories(root))
+            foreach(string modFolderPath in Directory.EnumerateDirectories(root))
             {
-                ModInfo? mod = ReadMod(modFolder, source);
+                ModInfo? mod = ReadMod(modFolderPath, source);
                 if (mod != null)
                     mods.Add(mod);
             }
             
         }
 
-        public ModInfo? ReadMod(string modFolder, ModSource source)
+        public ModInfo? ReadMod(string modFolderPath, ModSource source)
         {
-            string aboutPath = Path.Combine(modFolder, "About", "About.xml");
+            string aboutPath = Path.Combine(modFolderPath, "About", "About.xml");
             if (!File.Exists(aboutPath))
                 return null;
 
@@ -52,42 +53,118 @@ namespace Rimiaux.Services
             }
             catch (Exception ex) when (ex is XmlException or IOException)
             {
-                //Errors.Add(aboutPath + ": " + ex.Message);
                 Errors.Add($"{aboutPath}: {ex.Message}");
                 return null;
             }
             if (root == null)
                 return null;
 
-            string? name = ((string?)root.Element("name"));
-            string? packageId = ((string?)root.Element("packageId"));
-            string? author = ((string?)root.Element("author"));
-
-            // clunky but I want to keep intent explicit or something
-            if (string.IsNullOrEmpty(name))
-                Errors.Add($"{aboutPath}: no name");
-            if (string.IsNullOrEmpty(packageId))
-                Errors.Add($"{aboutPath}: no packageId");
-            if (string.IsNullOrEmpty(author))
-                Errors.Add($"{aboutPath}: no author");
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(packageId) || string.IsNullOrEmpty(author))
-                return null;
+            string name = getNameHelper(root, modFolderPath, source);
 
             return new ModInfo
             {
-                PackageId = packageId.ToLowerInvariant(),
-                Name = (string?)root.Element("name") ?? Path.GetFileName(modFolder),
-                Author = author /* TODO: only returns first element of author!!! there can be multiple (list) */,
-                FolderPath = modFolder,
-                Source = source,
+                PackageId = packageIdHelper(root, name),
+                Name = name,
+                Authors = getAuthorsHelper(root),
+                Description = (string?)root.Element("description") ?? "No description provided.",
+                FolderPath = modFolderPath,
+                ModVersion = (string?)root.Element("modVersion"),
                 SupportedVersions = root.Elements("supportedVersions").Select(x => (string)x).ToList(),
-                Dependencies = root.Elements("modDependencies").Elements("li")
-                    .Select(li => (string?)li.Element("packageId"))
-                    .Where(id => !string.IsNullOrEmpty(id))
-                    .Select(id => id!.ToLowerInvariant())
-                    .ToList(),
-                // need to implement loadBefore and loadAfter
+                Url = (string?)root.Element("url"),
+                Source = source,
+
+                Dependencies = getListedPackageIds(root, "modDependencies"),
+                LoadBefore = getListedPackageIds(root, "loadBefore"),
+                LoadAfter = getListedPackageIds(root, "loadAfter"),
+                IncompatibleWith = getListedPackageIds(root, "incompatibleWith"),
+                ForceLoadBefore = getListedPackageIds(root, "forceLoadBefore"),
+                ForceLoadAfter = getListedPackageIds(root, "forceLoadAfter")
             };
         }
+
+        private static string packageIdHelper(XElement root, string name)
+        {
+            string? packageId = (string?)root.Element("packageId");
+            if (!string.IsNullOrEmpty(packageId))
+                return packageId.ToLowerInvariant();
+
+            string author = (string?)root.Element("author") ?? "Anonymous";
+            string description = (string?)root.Element("description") ?? "No description provided.";
+
+            string hash = "none";
+            if (!string.IsNullOrEmpty(description))
+            {
+                hash = stableStringHash(description).ToString().Replace("-", "");
+                hash = hash.Substring(0, Math.Min(3, hash.Length));
+            }
+
+            return (convertToAscii(author + hash) + "." + convertToAscii(name)).ToLowerInvariant();
+        }
+
+        private static string getNameHelper(XElement root, string modFolderPath, ModSource source)
+        {
+            string? name = ((string?)root.Element("name"));
+            if (!string.IsNullOrEmpty(name))
+                return name;
+
+            if (source == ModSource.Workshop)
+                return "Workshop mod " + Path.GetFileName(modFolderPath);
+
+            return Path.GetFileName(modFolderPath);
+        }
+
+        private static List<string> getAuthorsHelper(XElement root)
+        {
+            List<string> authors = new List<string>();
+            string? author = (string?)root.Element("author");
+            if (!string.IsNullOrEmpty(author))
+                authors.Add(author);
+
+            authors.AddRange(root.Descendants("authors").Elements("li").Select(li => li.Value).Where(s => s.Length > 0));
+
+            authors = authors.Distinct().ToList();
+
+            if (authors.Count == 0)
+                authors.Add("Anonymous");
+
+            return authors;
+        }
+
+        private static List<string> getListedPackageIds(XElement root, string element)
+        {
+            XElement? container = root?.Element(element);
+            if (container == null)
+                return new List<string>();
+
+            return container.Elements("li")
+                .Select(li => li.HasElements ? (string?)li.Element("packageId"): li.Value)
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id!.Trim()).ToList();
+        }
+
+        private static string convertToAscii(string part)
+        {
+            StringBuilder sb = new StringBuilder(part.Length);
+            foreach (char ch in part)
+            {
+                char c = ch;
+                if (!char.IsLetterOrDigit(c) || c >= '\u0080')
+                    c = (char)(c % 25 + 'A');
+                sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
+        private static int stableStringHash(string str)
+        {
+            unchecked
+            {
+                int num = 23;
+                foreach (char c in str)
+                    num = num * 31 + c;
+                return num;
+            }
+        }
+
     }
 }

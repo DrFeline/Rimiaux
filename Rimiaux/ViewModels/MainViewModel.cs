@@ -19,10 +19,14 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     public partial string WorkshopPath { get; set; } = "";
 
+    [ObservableProperty]
+    public partial string ConfigPath { get; set; } = "";
+
     public MainViewModel()
     {
         GamePath = _settings.GamePath ?? "";
         WorkshopPath = _settings.SteamWorkshopPath ?? "";
+        ConfigPath = _settings.ConfigPath ?? "";
     }
 
     [ObservableProperty]
@@ -36,6 +40,7 @@ public partial class MainViewModel : ViewModelBase
     {
         _settings.GamePath = string.IsNullOrWhiteSpace(GamePath) ? null : GamePath.Trim();
         _settings.SteamWorkshopPath = string.IsNullOrWhiteSpace(WorkshopPath) ? null : WorkshopPath.Trim();
+        _settings.ConfigPath = string.IsNullOrWhiteSpace(ConfigPath) ? null : ConfigPath.Trim();
         SettingsService.Save(_settings);
 
         Status = "Scanning...";
