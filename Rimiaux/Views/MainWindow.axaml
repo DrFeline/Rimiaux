@@ -42,14 +42,35 @@
             </Grid.ColumnDefinitions>
 
             <Grid Grid.Column="0">
-                <Grid Margin="8">
-                    <TextBlock></TextBlock>
-                </Grid>
+                <TextBlock Text="Select a mod to see details."
+                           Foreground="Gray"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           IsVisible="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNull}}" />
+
+                <ScrollViewer IsVisible="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <StackPanel Margin="8" Spacing="6">
+                        <TextBlock Text="{Binding SelectedMod.Name}"
+                                   FontSize="18"
+                                   FontWeight="Bold"
+                                   TextWrapping="Wrap" >
+                        </TextBlock>
+                        <TextBlock Text="{Binding SelectedMod.PackageId}" Foreground="Gray" />
+                        <TextBlock Text="{Binding SelectedMod.Source}" Foreground="Gray" />
+                        <TextBlock Text="{Binding SelectedMod.Description}"
+                                   FontSize="16"
+                                   TextWrapping="Wrap" >
+                        </TextBlock>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
 
             <GridSplitter Grid.Column="1" Width="5" Background="Gray" />
 
-            <ListBox Grid.Column="2" ItemsSource="{Binding Mods}">
+            <ListBox Grid.Column="2"
+                     ItemsSource="{Binding Mods}"
+                     SelectedItem="{Binding SelectedMod}"
+                     ScrollViewer.AllowAutoHide="False">
                 <ListBox.ItemTemplate>
                     <DataTemplate x:DataType="m:ModInfo">
                         <Border>

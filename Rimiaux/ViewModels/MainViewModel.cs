@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,6 +23,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     public partial string ConfigPath { get; set; } = "";
 
+    [ObservableProperty]
+    public partial ModInfo? SelectedMod { get; set; }
     public MainViewModel()
     {
         GamePath = _settings.GamePath ?? "";
@@ -32,7 +35,8 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty]
     public partial string Status { get; set; } = "Press refresh to scan folders.";
 
-    public ObservableCollection<ModInfo> Mods { get; } = new();
+    [ObservableProperty]
+    public partial ObservableCollection<ModInfo> Mods { get; set; } = new();
 
     [RelayCommand]
     private async Task ScanAsync()
@@ -43,19 +47,28 @@ public partial class MainViewModel : ViewModelBase
         SettingsService.Save(_settings);
 
         Status = "Scanning...";
-        ModIndex modIndex = new ModIndex();
-        
-        await Task.Run(() => modIndex.PopulateIndex(_settings));
 
-        IEnumerable<ModInfo> mods = modIndex.Mods.Values
-            .SelectMany(entry => entry.AllInstances)
-            .OrderBy(mod => mod.Name)
-            .ThenBy(mod => mod.Source);
+        try
+        {
+            List<ModInfo> mods = await Task.Run(() =>
+            {
+                ModIndex modIndex = new ModIndex();
+                modIndex.PopulateIndex(_settings);
+                
+                return modIndex.Mods.Values
+                    .SelectMany(entry => entry.AllInstances)
+                    .OrderBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase)
+                    .ThenBy(mod => mod.Source)
+                    .ToList();
+            });
 
-        Mods.Clear();
-        foreach (ModInfo mod in mods)
-            Mods.Add(mod);
+            Mods = new ObservableCollection<ModInfo>(mods);
+            Status = $"Found {Mods.Count} mods.";
 
-        Status = $"Found {Mods.Count} mods.";
+        }
+        catch (Exception ex)
+        {
+            Status = $"Scan failed: {ex.Message}";
+        }
     }
 }
