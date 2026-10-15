@@ -17,12 +17,12 @@ namespace Rimiaux.Models
 
         public void PopulateIndex(Settings settings)
         {
-            scanFolder(settings.DataPath, ModSource.Official);
-            scanFolder(settings.LocalModsPath, ModSource.Local);
-            scanFolder(settings.SteamWorkshopPath, ModSource.Workshop);
+            ScanFolder(settings.DataPath, ModSource.Official);
+            ScanFolder(settings.LocalModsPath, ModSource.Local);
+            ScanFolder(settings.SteamWorkshopPath, ModSource.Workshop);
         }
 
-        private void add(ModInfo mod)
+        private void Add(ModInfo mod)
         {
             if (!_mods.TryGetValue(mod.PackageId, out ModEntry? entry))
             {
@@ -36,20 +36,20 @@ namespace Rimiaux.Models
                 entry.Local ??= mod;
         }
 
-        private void scanFolder(string? root, ModSource source)
+        private void ScanFolder(string? root, ModSource source)
         {
             if (!Directory.Exists(root))
                 return;
 
             foreach (string modFolderPath in Directory.EnumerateDirectories(root))
             {
-                ModInfo? mod = readMod(modFolderPath, source);
+                ModInfo? mod = ReadMod(modFolderPath, source);
                 if (mod != null)
-                    add(mod);
+                    Add(mod);
             }
         }
 
-        private static ModInfo? readMod(string modFolderPath, ModSource source)
+        private static ModInfo? ReadMod(string modFolderPath, ModSource source)
         {
             string aboutPath = Path.Combine(modFolderPath, "About", "About.xml");
             if (!File.Exists(aboutPath))
@@ -67,11 +67,11 @@ namespace Rimiaux.Models
             if (root == null)
                 return null;
 
-            string name = getNameHelper(root, modFolderPath, source);
+            string name = GetNameHelper(root, modFolderPath, source);
 
             return new ModInfo
             {
-                PackageId = getPackageIdHelper(root, name),
+                PackageId = GetPackageIdHelper(root, name),
                 Name = name,
                 Authors = getAuthorsHelper(root),
                 Description = (string?)root.Element("description") ?? "No description provided.",
@@ -90,7 +90,7 @@ namespace Rimiaux.Models
             };
         }
 
-        private static string getPackageIdHelper(XElement root, string name)
+        private static string GetPackageIdHelper(XElement root, string name)
         {
             string? packageId = (string?)root.Element("packageId");
             if (!string.IsNullOrEmpty(packageId))
@@ -109,7 +109,7 @@ namespace Rimiaux.Models
             return (convertToAscii(author + hash) + "." + convertToAscii(name)).ToLowerInvariant();
         }
 
-        private static string getNameHelper(XElement root, string modFolderPath, ModSource source)
+        private static string GetNameHelper(XElement root, string modFolderPath, ModSource source)
         {
             string? name = ((string?)root.Element("name"));
             if (!string.IsNullOrEmpty(name))

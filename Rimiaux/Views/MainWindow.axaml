@@ -18,7 +18,9 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="Gray">
-            <MenuItem Header="_File" />
+            <MenuItem Header="_File">
+                <MenuItem Header="_Settings..." Click="OpenSettings" />
+            </MenuItem>
             <MenuItem Header="_Edit" />
             <MenuItem Header="_View" />
         </Menu>
@@ -27,7 +29,7 @@
             <DockPanel>
                 <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Margin="8,0" />
                 <Menu HorizontalAlignment="Right">
-                    <MenuItem Header="Refresh" Command="{Binding ScanCommand}" />
+                    <MenuItem Header="Refresh" Command="{Binding RefreshCommand}" />
                     <MenuItem Header="Sort" />
                     <MenuItem Header="Save"/>
                 </Menu>
@@ -68,7 +70,7 @@
             <GridSplitter Grid.Column="1" Width="5" Background="Gray" />
 
             <ListBox Grid.Column="2"
-                     ItemsSource="{Binding Mods}"
+                     ItemsSource="{Binding InactiveModList}"
                      SelectedItem="{Binding SelectedMod}"
                      ScrollViewer.AllowAutoHide="False">
                 <ListBox.ItemTemplate>

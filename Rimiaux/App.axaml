@@ -11,5 +11,12 @@
 
     <Application.Styles>
         <FluentTheme />
+
+        <Style Selector="ScrollBar">
+            <Setter Property="HideDelay" Value="0:0:0.1" />
+            
+            <Setter Property="ShowDelay" Value="0:0:0.5" />
+        </Style>
     </Application.Styles>
+
 </Application>

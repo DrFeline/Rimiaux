@@ -1,0 +1,45 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Rimiaux.ViewModels"
+        x:Class="Rimiaux.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Settings"
+        Width="600"
+        SizeToContent="Height"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+
+    <StackPanel Margin="12" Spacing="6">
+        <TextBlock Text="Game path (RimWorld install folder)" />
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Browse..." Margin="6,0,0,0"
+                    Click="BrowseGamePath" />
+            <TextBox Text="{Binding GamePath}" />
+        </DockPanel>
+
+        <TextBlock Text="Steam Workshop path" Margin="0,6,0,0" />
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Browse..." Margin="6,0,0,0"
+                    Click="BrowseWorkshopPath" />
+            <TextBox Text="{Binding WorkshopPath}" />
+        </DockPanel>
+
+        <TextBlock Text="Config path (folder containing ModsConfig.xml)" Margin="0,6,0,0" />
+        <DockPanel>
+            <Button DockPanel.Dock="Right" Content="Browse..." Margin="6,0,0,0"
+                    Click="BrowseConfigPath" />
+            <TextBox Text="{Binding ConfigPath}" />
+        </DockPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                    Spacing="6" Margin="0,12,0,0">
+            <Button Content="Save" IsDefault="True" Click="Save" />
+            <Button Content="Cancel" IsCancel="True" Click="Cancel" />
+        </StackPanel>
+    </StackPanel>
+</Window>

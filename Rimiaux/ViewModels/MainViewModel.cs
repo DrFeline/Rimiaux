@@ -36,16 +36,15 @@ public partial class MainViewModel : ViewModelBase
     public partial string Status { get; set; } = "Press refresh to scan folders.";
 
     [ObservableProperty]
-    public partial ObservableCollection<ModInfo> Mods { get; set; } = new();
+    public partial ObservableCollection<ModInfo> InactiveModList { get; set; } = new();
 
+    [ObservableProperty]
+    public partial ObservableCollection<ModInfo> ActiveModList { get; set; } = new();
+
+    
     [RelayCommand]
-    private async Task ScanAsync()
+    private async Task RefreshAsync()
     {
-        _settings.GamePath = string.IsNullOrWhiteSpace(GamePath) ? null : GamePath.Trim();
-        _settings.SteamWorkshopPath = string.IsNullOrWhiteSpace(WorkshopPath) ? null : WorkshopPath.Trim();
-        _settings.ConfigPath = string.IsNullOrWhiteSpace(ConfigPath) ? null : ConfigPath.Trim();
-        SettingsService.Save(_settings);
-
         Status = "Scanning...";
 
         try
@@ -62,8 +61,8 @@ public partial class MainViewModel : ViewModelBase
                     .ToList();
             });
 
-            Mods = new ObservableCollection<ModInfo>(mods);
-            Status = $"Found {Mods.Count} mods.";
+            InactiveModList = new ObservableCollection<ModInfo>(mods);
+            Status = $"Found {InactiveModList.Count} mods.";
 
         }
         catch (Exception ex)
@@ -71,4 +70,20 @@ public partial class MainViewModel : ViewModelBase
             Status = $"Scan failed: {ex.Message}";
         }
     }
+
+    public void ApplySettings(string gamePath, string workshopPath, string configPath)
+    {
+        GamePath = gamePath.Trim();
+        WorkshopPath = workshopPath.Trim();
+        ConfigPath = configPath.Trim();
+
+        _settings.GamePath = NullIfBlank(GamePath);
+        _settings.SteamWorkshopPath = NullIfBlank(WorkshopPath);
+        _settings.ConfigPath = NullIfBlank(ConfigPath);
+        SettingsService.Save(_settings);
+
+        Status = "Settings saved. Press refresh to rescan.";
+    }
+
+    private static string? NullIfBlank(string s) => string.IsNullOrWhiteSpace(s) ? null : s;
 }
