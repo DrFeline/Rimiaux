@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Rimiaux.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        x:Class="Rimiaux.Views.SettingsWindow"
+        x:DataType="vm:SettingsViewModel"
+        Title="Settings"
+        Width="650"
+        SizeToContent="Height"
+        CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Icon="/Assets/RimiauxIcon.ico">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+
+    <StackPanel Margin="16" Spacing="12">
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Game install folder" FontWeight="Bold" />
+            <TextBox Text="{Binding GamePath}"
+                     Watermark="e.g. C:\Program Files (x86)\Steam\steamapps\common\RimWorld" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Config folder (ModsConfig.xml, saves)" FontWeight="Bold" />
+            <TextBox Text="{Binding ConfigPath}"
+                     Watermark="e.g. %USERPROFILE%\AppData\LocalLow\Ludeon Studios\RimWorld by Ludeon Studios\Config" />
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Steam Workshop mods folder" FontWeight="Bold" />
+            <TextBox Text="{Binding SteamWorkshopPath}"
+                     Watermark="e.g. C:\Program Files (x86)\Steam\steamapps\workshop\content\294100" />
+        </StackPanel>
+
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="IndianRed"
+                   TextWrapping="Wrap"
+                   IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
+            <Button Content="Save" Command="{Binding SaveCommand}" IsDefault="True" Classes="accent" />
+        </StackPanel>
+
+    </StackPanel>
+</Window>

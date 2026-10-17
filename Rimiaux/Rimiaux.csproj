@@ -21,8 +21,6 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Dock.Avalonia" Version="12.1.0.9" />
-    <PackageReference Include="Dock.Model.Mvvm" Version="12.1.0.9" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,5 +29,11 @@
 
   <ItemGroup>
     <None Include="C:\Users\Cat\source\repos\DrFeline\Rimiaux\Rimiaux\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Views\SettingsWindow.axaml.cs">
+      <DependentUpon>SettingsWindow.axaml</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
