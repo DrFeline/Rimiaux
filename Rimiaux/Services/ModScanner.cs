@@ -59,7 +59,8 @@ namespace Rimiaux.Services
         private static ModMetaData ReadMod(string modFolderPath, ModSource source)
         {
             XElement? root = null;
-            string? aboutPath = FindAboutXml(modFolderPath);
+            string? aboutDir = FindAboutDir(modFolderPath);
+            string? aboutPath = FindFile(aboutDir, "About.xml");
             bool aboutValidation = false;
 
             if (aboutPath != null)
@@ -77,6 +78,7 @@ namespace Rimiaux.Services
             }
 
             string displayName = GetDisplayNameHelper(root, modFolderPath, source);
+            string? previewImagePath = FindFile(aboutDir, "Preview.png");
 
             return new ModMetaData
             {
@@ -90,6 +92,7 @@ namespace Rimiaux.Services
                 SupportedVersions = root?.Element("supportedVersions")?.Elements("li").Select(li => li.Value.Trim()).ToList() ?? new(),
                 Url = XmlStr(root, "url"),
                 Source = source,
+                PreviewImagePath = previewImagePath,
                 ValidAboutXml = aboutValidation,
 
                 Dependencies = GetDependencies(root?.Element("modDependencies")),
@@ -194,12 +197,15 @@ namespace Rimiaux.Services
                 .ToList() ?? new List<string>();
         }
 
-        private static string? FindAboutXml(string modFolderPath)
+        private static string? FindAboutDir(string modFolderPath)
         {
-            string? aboutDir = Directory.EnumerateDirectories(modFolderPath, "About", IgnoreCase).FirstOrDefault();
-            if (aboutDir == null) return null;
+            return Directory.EnumerateDirectories(modFolderPath, "About", IgnoreCase).FirstOrDefault();
+        }
 
-            return Directory.EnumerateFiles(aboutDir, "About.xml", IgnoreCase).FirstOrDefault();
+        private static string? FindFile(string? dir, string fileName)
+        {
+            if (dir == null) return null;
+            return Directory.EnumerateFiles(dir, fileName, IgnoreCase).FirstOrDefault();
         }
 
         private static readonly EnumerationOptions IgnoreCase = new()

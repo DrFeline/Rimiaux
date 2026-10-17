@@ -55,8 +55,11 @@
                         <TextBlock Text="{Binding SelectedMod.DisplayName}"
                                    FontSize="18"
                                    FontWeight="Bold"
-                                   TextWrapping="Wrap" >
-                        </TextBlock>
+                                   TextWrapping="Wrap" />
+                        <Image Source="{Binding SelectedModPreview}" Stretch="Uniform"
+                                   MaxHeight="300"
+                                   HorizontalAlignment="Left"
+                                   IsVisible="{Binding SelectedModPreview, Converter={x:Static ObjectConverters.IsNotNull}}"/>
                         <TextBlock Text="{Binding SelectedMod.PackageId}" Foreground="Gray" />
                         <TextBlock Text="{Binding SelectedMod.Source}" Foreground="Gray" />
                         <TextBlock Text="{Binding SelectedMod.Description}"

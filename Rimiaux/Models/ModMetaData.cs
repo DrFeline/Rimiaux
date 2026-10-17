@@ -16,6 +16,7 @@ namespace Rimiaux.Models
         public List<string> SupportedVersions { get; init; } = new();
         public string? Url { get; init; }
         public required ModSource Source { get; init; }
+        public string? PreviewImagePath { get; init; }
         public required bool ValidAboutXml { get; init; }
 
         
