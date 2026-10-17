@@ -4,7 +4,7 @@ A desktop mod manager for [RimWorld](https://rimworldgame.com/), built with C# a
 
 > **Status:** Early development. Core mod scanning works; sorting features are in progress.
 
-![Screenshot of Rimiaux](Assets/screenshot.png)
+![Screenshot of Rimiaux](Rimiaux/Assets/screenshot.png)
 
 ## Features
 
