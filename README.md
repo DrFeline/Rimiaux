@@ -20,7 +20,7 @@ A desktop mod manager for [RimWorld](https://rimworldgame.com/), built with C# a
 - [ ] Integration with the RimSort community rules database
 - [ ] Integration with the "No Version Warning" database
 - [ ] Modlists: save, load, and switch between mod configurations
-- [ ] Mod texture conversion *(stretch goal; a large project in its own right)*
+- [ ] Mod texture conversion
 
 ## Building from Source
 
