@@ -19,7 +19,7 @@
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="Gray">
             <MenuItem Header="_File">
-                <MenuItem Header="_Settings..." Click="OpenSettings_Click" />
+                <MenuItem Header="_Settings" Click="OpenSettings_Click" />
             </MenuItem>
             <MenuItem Header="_Edit" />
             <MenuItem Header="_View" />

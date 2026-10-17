@@ -12,7 +12,6 @@ namespace Rimiaux.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly Settings _settings = SettingsService.Settings;
     
     [ObservableProperty]
     public partial ModMetaData? SelectedMod { get; set; }
@@ -34,8 +33,12 @@ public partial class MainViewModel : ViewModelBase
 
         await ModService.RefreshModsAsync();
 
+        IOrderedEnumerable<ModMetaData> sorted = ModService.AllMods
+            .OrderBy(m => m.Source)
+            .ThenBy(m => m.DisplayName, StringComparer.CurrentCultureIgnoreCase);
+
         InactiveModList.Clear();
-        foreach (ModMetaData mod in ModService.AllMods)
+        foreach (ModMetaData mod in sorted)
             InactiveModList.Add(mod);
 
         Status = $"Found {InactiveModList.Count} mods.";

@@ -22,7 +22,7 @@ namespace Rimiaux.Services
                 string json = File.ReadAllText(AppPaths.SettingsFile);
                 Settings = JsonSerializer.Deserialize<Settings>(json, JsonOptions) ?? new Settings();
             }
-            catch (System.Exception ex) when (ex is JsonException or IOException or UnauthorizedAccessException)
+            catch (System.Exception ex) when (ex is JsonException)
             {
                 // TODO: record corrupted settings file warning
                 Settings = new Settings();
