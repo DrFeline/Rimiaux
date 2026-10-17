@@ -12,34 +12,19 @@ namespace Rimiaux.ViewModels;
 
 public partial class MainViewModel : ViewModelBase
 {
-    private readonly Settings _settings = SettingsService.Load();
+    private readonly Settings _settings = SettingsService.Settings;
     
     [ObservableProperty]
-    public partial string GamePath { get; set; } = "";
-
-    [ObservableProperty]
-    public partial string WorkshopPath { get; set; } = "";
-
-    [ObservableProperty]
-    public partial string ConfigPath { get; set; } = "";
-
-    [ObservableProperty]
-    public partial ModInfo? SelectedMod { get; set; }
-    public MainViewModel()
-    {
-        GamePath = _settings.GamePath ?? "";
-        WorkshopPath = _settings.SteamWorkshopPath ?? "";
-        ConfigPath = _settings.ConfigPath ?? "";
-    }
+    public partial ModMetaData? SelectedMod { get; set; }
 
     [ObservableProperty]
     public partial string Status { get; set; } = "Press refresh to scan folders.";
 
     [ObservableProperty]
-    public partial ObservableCollection<ModInfo> InactiveModList { get; set; } = new();
+    public partial ObservableCollection<ModMetaData> InactiveModList { get; set; } = new();
 
     [ObservableProperty]
-    public partial ObservableCollection<ModInfo> ActiveModList { get; set; } = new();
+    public partial ObservableCollection<ModMetaData> ActiveModList { get; set; } = new();
 
     
     [RelayCommand]
@@ -47,43 +32,13 @@ public partial class MainViewModel : ViewModelBase
     {
         Status = "Scanning...";
 
-        try
-        {
-            List<ModInfo> mods = await Task.Run(() =>
-            {
-                ModIndex modIndex = new ModIndex();
-                modIndex.PopulateIndex(_settings);
-                
-                return modIndex.Mods.Values
-                    .SelectMany(entry => entry.AllInstances)
-                    .OrderBy(mod => mod.Name, StringComparer.CurrentCultureIgnoreCase)
-                    .ThenBy(mod => mod.Source)
-                    .ToList();
-            });
+        await ModService.RefreshModsAsync();
 
-            InactiveModList = new ObservableCollection<ModInfo>(mods);
-            Status = $"Found {InactiveModList.Count} mods.";
+        InactiveModList.Clear();
+        foreach (ModMetaData mod in ModService.AllMods)
+            InactiveModList.Add(mod);
 
-        }
-        catch (Exception ex)
-        {
-            Status = $"Scan failed: {ex.Message}";
-        }
+        Status = $"Found {InactiveModList.Count} mods.";
     }
 
-    public void ApplySettings(string gamePath, string workshopPath, string configPath)
-    {
-        GamePath = gamePath.Trim();
-        WorkshopPath = workshopPath.Trim();
-        ConfigPath = configPath.Trim();
-
-        _settings.GamePath = NullIfBlank(GamePath);
-        _settings.SteamWorkshopPath = NullIfBlank(WorkshopPath);
-        _settings.ConfigPath = NullIfBlank(ConfigPath);
-        SettingsService.Save(_settings);
-
-        Status = "Settings saved. Press refresh to rescan.";
-    }
-
-    private static string? NullIfBlank(string s) => string.IsNullOrWhiteSpace(s) ? null : s;
 }

@@ -18,9 +18,7 @@
 
     <DockPanel>
         <Menu DockPanel.Dock="Top" Background="Gray">
-            <MenuItem Header="_File">
-                <MenuItem Header="_Settings..." Click="OpenSettings" />
-            </MenuItem>
+            <MenuItem Header="_File"/>
             <MenuItem Header="_Edit" />
             <MenuItem Header="_View" />
         </Menu>
@@ -52,7 +50,7 @@
 
                 <ScrollViewer IsVisible="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNotNull}}">
                     <StackPanel Margin="8" Spacing="6">
-                        <TextBlock Text="{Binding SelectedMod.Name}"
+                        <TextBlock Text="{Binding SelectedMod.DisplayName}"
                                    FontSize="18"
                                    FontWeight="Bold"
                                    TextWrapping="Wrap" >
@@ -74,14 +72,14 @@
                      SelectedItem="{Binding SelectedMod}"
                      ScrollViewer.AllowAutoHide="False">
                 <ListBox.ItemTemplate>
-                    <DataTemplate x:DataType="m:ModInfo">
+                    <DataTemplate x:DataType="m:ModMetaData">
                         <Border>
                             <StackPanel>
                                 <!-- <TextBlock Text="{Binding Name}" FontWeight="Bold" /> -->
                                 <TextBlock>
                                     <!-- Formatting differs depending on whether each Run is in a newline or not. freaky -->
                                     <Run Text="{Binding Source}" Foreground="Gray" />
-                                    <Run Text="{Binding Name}" FontWeight="Bold" />
+                                    <Run Text="{Binding DisplayName}" FontWeight="Bold" />
                                     <!-- axaml text completion sucks ASS oh my god just let me type -->
                                 </TextBlock>
                                 <TextBlock Text="{Binding PackageId}" />

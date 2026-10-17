@@ -26,8 +26,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Views\SettingsWindow.axaml.cs">
-      <DependentUpon>SettingsWindow.axaml</DependentUpon>
-    </Compile>
+    <EditorConfigFiles Remove="C:\Users\Cat\source\repos\DrFeline\Rimiaux\Rimiaux\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\Cat\source\repos\DrFeline\Rimiaux\Rimiaux\.editorconfig" />
   </ItemGroup>
 </Project>

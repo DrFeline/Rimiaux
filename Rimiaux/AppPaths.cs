@@ -6,9 +6,14 @@ namespace Rimiaux
     public static class AppPaths
     {
         public static string DataFolder { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Rimiaux");
-        public static string SettingsFile => Path.Combine(DataFolder, "settings.json");
+        public static string SettingsFolder { get; } = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Rimiaux");
+        public static string SettingsFile => Path.Combine(SettingsFolder, "settings.json");
 
-        // runs once the first time the class is accessed, ensures the data folder exists
-        static AppPaths() => Directory.CreateDirectory(DataFolder);
+        public static void Load()
+        {
+            Directory.CreateDirectory(DataFolder);
+            Directory.CreateDirectory(SettingsFolder);
+        }
+
     }
 }
